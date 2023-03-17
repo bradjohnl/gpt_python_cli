@@ -28,7 +28,7 @@ def continue_conversation():
             print("Invalid input. Please enter 'y' or 'n'.")
 
 def load_config():
-    config_path = os.path.expanduser('~/.openai_cli/config.json')
+    config_path = os.path.expanduser('~/.gpt_python_cli/config.json')
     with open(config_path) as file:
         return json.load(file)
 
