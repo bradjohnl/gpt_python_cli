@@ -14,6 +14,14 @@ def print_help():
     print("  --file, -f <file_path>            Use a file as input for the model")
     print("  --help, -h                        Show this help message")
 
+def continue_conversation():
+    while True:
+        user_input = input("Do you want to continue the conversation? (y/n): ").lower()
+        if user_input in ('y', 'n'):
+            return user_input == 'y'
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
+
 input_type = None
 input_content = sys.argv[1]
 model = None
@@ -45,28 +53,32 @@ if file_path:
     with open(file_path, 'r') as file:
         file_content = file.read()
 
+messages = [{"role": "system", "content": "You are a helpful assistant."}]
+
 if input_type == 'question':
-    prompt = f"""Q: {input_content}
-A:"""
+    messages.append({"role": "user", "content": input_content})
 elif input_type == 'code':
-    prompt = f"# {input_content}\n\n{file_content}\n"
-else:
-    prompt = f"Convert this text to a linux shell command.\n\nExample: Show all filesystems usage, space and mount point in human format\nOutput: df -h\n\nExample: Check the size of the pCloudDrive folder every 3 seconds\nOutput: while true; do du -sh pCloudDrive; sleep 1s; clear; done;\n\nExample: Find the smallest file in a directory and in all its subdirectories\nOutput: find . -type f -exec du -sh {{}} + | sort -n\nExample: {input_content}\nOutput:"
+    messages.append({"role": "user", "content": f"{file_content}\n# {input_content}\n"})
 
-max_tokens = 2048 if model == "gpt-4" else 32000
+while True:
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        max_tokens=2048,
+        n=1,
+        temperature=0.9,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0.6,
+        stop=["\n", " A:"]
+    )
 
-response = openai.ChatCompletion.create(
-    model=model,
-    messages=[{"role": "system", "content": "You are a helpful assistant."},
-              {"role": "user", "content": prompt}],
-    max_tokens=max_tokens,
-    n=1,
-    temperature=0.9,
-    top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0.6,
-    stop=["\n", " A:"]
-)
+    response_text = response['choices'][0]['message']['content']
+    print(response_text)
 
-response_text = response['choices'][0]['message']['content']
-print(response_text)
+    if not continue_conversation():
+        break
+
+    messages.append({"role": "assistant", "content": response_text})
+    user_input = input("Enter your next message: ")
+    messages.append({"role": "user", "content": user_input})
