@@ -12,7 +12,6 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 def print_help():
     print("Usage:")
     print("  --question, -q <question>         Ask a generic question")
-    print("  --code, -c <code>                 Generate code based on the given text")
     print("  --model, -m <model>               Specify the model to use (gpt-4 or gpt-4-32k)")
     print("  --file, -f <file_path>            Use a file as input for the model")
     print("  --prompt, -p <prompt_name>        Use a custom prompt from the library")
@@ -62,10 +61,6 @@ while i < len(sys.argv):
         input_type = 'question'
         input_content = sys.argv[i + 1]
         i += 1
-    elif arg in ('--code', '-c'):
-        input_type = 'code'
-        input_content = sys.argv[i + 1]
-        i += 1
     elif arg in ('--model', '-m'):
         model = sys.argv[i + 1]
         if model not in ["gpt-4", "gpt-4-32k"]:
@@ -91,7 +86,7 @@ while i < len(sys.argv):
     i += 1
 
 if model is None:
-    model = "gpt-4-32k" if input_type == "code" else "gpt-4"
+    model = "gpt-4"
 
 if file_path:
     with open(file_path, 'r') as file:
@@ -103,12 +98,8 @@ if custom_prompt:
     formatted_prompt = custom_prompt.format(input_content=input_content, file_content=file_content)
     messages.append({"role": "user", "content": formatted_prompt})
 
-if custom_prompt:
-    messages.append({"role": "user", "content": custom_prompt.format(input_content=input_content, file_content=file_content)})
-elif input_type == 'question':
+if input_type == 'question':
     messages.append({"role": "user", "content": input_content})
-elif input_type == 'code':
-    messages.append({"role": "user", "content": f"{file_content}\n# {input_content}\n"})
 
 chat_log = []
 
