@@ -3,6 +3,9 @@
 import os
 import openai
 import sys
+import json
+import pathlib
+from datetime import datetime
 
 openai.api_key = os.environ.get('OPENAI_API_KEY')
 
@@ -12,6 +15,9 @@ def print_help():
     print("  --code, -c <code>                 Generate code based on the given text")
     print("  --model, -m <model>               Specify the model to use (gpt-4 or gpt-4-32k)")
     print("  --file, -f <file_path>            Use a file as input for the model")
+    print("  --prompt, -p <prompt_name>        Use a custom prompt from the library")
+    print("  --print-only, -po                 Print the command without asking to continue")
+    print("  --save-log, -sl                   Save the chat log to a default path")
     print("  --help, -h                        Show this help message")
 
 def continue_conversation():
@@ -22,29 +28,67 @@ def continue_conversation():
         else:
             print("Invalid input. Please enter 'y' or 'n'.")
 
+def load_config():
+    config_path = os.path.expanduser('~/.howto/config.json')
+    with open(config_path) as file:
+        return json.load(file)
+
+def load_prompt(prompt_name, library_path):
+    prompt_file = os.path.join(library_path, f"{prompt_name}.txt")
+    with open(prompt_file, 'r') as file:
+        return file.read()
+
+config = load_config()
+default_library_path = config.get('library_path', '')
+
 input_type = None
 input_content = sys.argv[1]
 model = None
 file_content = None
 file_path = None
+custom_prompt = None
+print_only = False
+save_log = False
+prompt_name = None
 
-for i, arg in enumerate(sys.argv[1:]):
+i = 1
+while i < len(sys.argv):
+    arg = sys.argv[i]
+
     if arg in ('--help', '-h'):
         print_help()
         sys.exit(0)
     elif arg in ('--question', '-q'):
         input_type = 'question'
-        input_content = sys.argv[i + 2]
+        input_content = sys.argv[i + 1]
+        i += 1
     elif arg in ('--code', '-c'):
         input_type = 'code'
-        input_content = sys.argv[i + 2]
+        input_content = sys.argv[i + 1]
+        i += 1
     elif arg in ('--model', '-m'):
-        model = sys.argv[i + 2]
+        model = sys.argv[i + 1]
         if model not in ["gpt-4", "gpt-4-32k"]:
             print("Invalid model. Choose 'gpt-4' or 'gpt-4-32k'.")
             sys.exit(1)
+        i += 1
     elif arg in ('--file', '-f'):
-        file_path = sys.argv[i + 2]
+        file_path = sys.argv[i + 1]
+        i += 1
+    elif arg in ('--prompt', '-p'):
+        prompt_name = sys.argv[i + 1]
+        custom_prompt = load_prompt(sys.argv[i + 1], default_library_path)
+        i += 1
+    elif arg in ('--print-only', '-po'):
+        print_only = True
+    elif arg in ('--save-log', '-sl'):
+        save_log = True
+    else:
+        print(f"Unknown option '{arg}'")
+        print_help()
+        sys.exit(1)
+    
+    i += 1
 
 if model is None:
     model = "gpt-4-32k" if input_type == "code" else "gpt-4"
@@ -55,10 +99,18 @@ if file_path:
 
 messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
-if input_type == 'question':
+if custom_prompt:
+    formatted_prompt = custom_prompt.format(input_content=input_content, file_content=file_content)
+    messages.append({"role": "user", "content": formatted_prompt})
+
+if custom_prompt:
+    messages.append({"role": "user", "content": custom_prompt.format(input_content=input_content, file_content=file_content)})
+elif input_type == 'question':
     messages.append({"role": "user", "content": input_content})
 elif input_type == 'code':
     messages.append({"role": "user", "content": f"{file_content}\n# {input_content}\n"})
+
+chat_log = []
 
 while True:
     response = openai.ChatCompletion.create(
@@ -70,15 +122,33 @@ while True:
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0.6,
-        stop=["\n", " A:"]
+        stop=[" A:"]
     )
 
     response_text = response['choices'][0]['message']['content']
     print(response_text)
+    chat_log.append(response_text)
 
-    if not continue_conversation():
+    if print_only or not continue_conversation():
         break
 
     messages.append({"role": "assistant", "content": response_text})
-    user_input = input("Enter your next message: ")
+    user_input = input("Enter your next message (Press enter twice to finish):\n")
+    multiline_input = []
+    while user_input:
+        multiline_input.append(user_input)
+        user_input = input()
+    user_input = "\n".join(multiline_input)
     messages.append({"role": "user", "content": user_input})
+    chat_log.append(user_input)
+
+if save_log:
+    log_path = pathlib.Path(config.get('log_path', ''))
+    log_path.mkdir(parents=True, exist_ok=True)
+    date_str = datetime.now().strftime("%Y%m%d")
+    log_file = log_path / f"{date_str}_{prompt_name}.log"
+    with open(log_file, 'a') as file:
+        for entry in chat_log:
+            file.write(entry)
+            file.write("\n")
+    print(f"Chat log saved to {log_file}")
