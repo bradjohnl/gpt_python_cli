@@ -1,4 +1,4 @@
-# OpenAI Python CLI
+# GPT Python CLI
 
 A Python-based command-line interface (CLI) for interacting with OpenAI's GPT-4 model. With this CLI, you can ask questions, generate text, and use custom prompts to control the model's output.
 
@@ -19,13 +19,13 @@ A Python-based command-line interface (CLI) for interacting with OpenAI's GPT-4 
 1. Clone the repository:
 
   ```bash
-  git clone https://github.com/bradjohnl/openai_python_cli.git
+  git clone https://github.com/bradjohnl/gpt_python_cli.git
   ```
 
 1. Navigate to the repository directory:
 
 ```bash
-cd openai_python_cli
+cd gpt_python_cli
 ```
 
 1. Install the required dependencies:
@@ -43,8 +43,8 @@ export OPENAI_API_KEY="your_api_key_here"
 1. Create a configuration file in your home directory:
 
 ```bash
-mkdir ~/.openai_cli
-cp config_sample.json ~/.openai_cli/config.json
+mkdir ~/.gpt_python_cli
+cp config_sample.json ~/.gpt_python_cli/config.json
 ```
 
 1. Customize the paths in config.json
@@ -68,7 +68,7 @@ Options:
 
 ## Configuration File
 
-Create a JSON configuration file at ~/.openai_cli/config.json with the following content:
+Create a JSON configuration file at ~/.gpt_python_cli/config.json with the following content:
 
 ```json
 {
@@ -147,7 +147,7 @@ These are just a few examples of the many attractions that make Paris a beloved 
 ### Generate code using GPT-4:
 
 ```bash
-./openai_cli.py --file openai_cli.py --question "Generate unit tests for the following code:"
+./gpt_python_cli.py --file gpt_python_cli.py --question "Generate unit tests for the following code:"
 ```
 
 #### Output:
@@ -220,7 +220,7 @@ In this example, we have added a custom prompt file named find_command.txt to th
 Run the following command to use the custom prompt:
 
 ```bash
-./openai_cli.py --prompt find_command --print-only -q "Find all files in the current directory that contain the word 'test'"
+./gpt_python_cli.py --prompt find_command --print-only -q "Find all files in the current directory that contain the word 'test'"
 ```
 
 #### Output
@@ -236,7 +236,7 @@ Furthermore, we have added the `--print-only` flag to only print the output of t
 ### Save the chat log to a default path:
 
 ```bash
-./openai_cli.py --save-log --question "What is the purpose of a transformer in an electrical system?"
+./gpt_python_cli.py --save-log --question "What is the purpose of a transformer in an electrical system?"
 ```
 
 #### Output:
