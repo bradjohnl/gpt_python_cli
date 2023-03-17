@@ -1,5 +1,15 @@
 # GPT Python CLI
 
+## DISCLAIMER:
+
+This project, GPT_Python_CLI, is an independently developed tool and is not affiliated with, endorsed, or supported by OpenAI Inc. It is not an official client for the OpenAI API, nor is it developed or maintained by OpenAI.
+
+The GPT_Python_CLI project aims to provide a convenient command-line interface for users to interact with GPT-4 language models through the OpenAI API. Any opinions, findings, conclusions, or recommendations expressed in this project are those of the author(s) and do not necessarily reflect the views of OpenAI Inc.
+
+Please refer to OpenAI's official documentation for the most accurate and up-to-date information regarding the OpenAI API, GPT models, and their usage.
+
+## Introduction
+
 A Python-based command-line interface (CLI) for interacting with OpenAI's GPT-4 model. With this CLI, you can ask questions, generate text, and use custom prompts to control the model's output.
 
 ## Features
