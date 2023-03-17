@@ -12,7 +12,7 @@ openai.api_key = os.environ.get('OPENAI_API_KEY')
 def print_help():
     print("Usage:")
     print("  --question, -q <question>         Ask a generic question")
-    print("  --model, -m <model>               Specify the model to use (gpt-4 or gpt-4-32k)")
+    print("  --model, -m <model>               Specify the model to use (gpt-4 only for the moment)")
     print("  --file, -f <file_path>            Use a file as input for the model")
     print("  --prompt, -p <prompt_name>        Use a custom prompt from the library")
     print("  --print-only, -po                 Print the command without asking to continue")
@@ -28,7 +28,7 @@ def continue_conversation():
             print("Invalid input. Please enter 'y' or 'n'.")
 
 def load_config():
-    config_path = os.path.expanduser('~/.howto/config.json')
+    config_path = os.path.expanduser('~/.openai_cli/config.json')
     with open(config_path) as file:
         return json.load(file)
 
@@ -63,8 +63,8 @@ while i < len(sys.argv):
         i += 1
     elif arg in ('--model', '-m'):
         model = sys.argv[i + 1]
-        if model not in ["gpt-4", "gpt-4-32k"]:
-            print("Invalid model. Choose 'gpt-4' or 'gpt-4-32k'.")
+        if model not in ["gpt-4"]:
+            print("Invalid model. Choose 'gpt-4'")
             sys.exit(1)
         i += 1
     elif arg in ('--file', '-f'):
@@ -100,6 +100,9 @@ if custom_prompt:
 
 if input_type == 'question':
     messages.append({"role": "user", "content": input_content})
+    
+if input_type == 'question' and file_content:
+    messages.append({"role": "user", "content": f"# {input_content}\n\n{file_content}"})
 
 chat_log = []
 
