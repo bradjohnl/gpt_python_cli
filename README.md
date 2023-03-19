@@ -102,24 +102,7 @@ Replace the values with the paths to your custom prompts and chat logs directori
 
 Custom prompts are text files containing a prompt template that you can use with the CLI. You can use placeholders like {input_content} and {file_content} to represent the user's input and the content of a file, respectively.
 
-Create a text file inside your custom prompts directory with the same name as your custom prompt and a .txt extension. Write your custom prompt template, and use double curly brackets to include JSON syntax. For example:
-
-```json
-{{"role": "system", "content": "You are a helpful assistant."}},
-{{"role": "user", "content": "Convert the following text to a Linux shell command. Just print the command without any other output: {input_content}"}}
-```
-
-To use a custom prompt with the CLI, run:
-
-```bash
-./gpt_python_cli.py --prompt custom_prompt_name --file input.txt
-```
-
-Replace custom_prompt_name with the name of your custom prompt (without the extension).
-
-You can also use simpler prompts such as:
-Don't forget to include placeholders for the user's input and file content! ({input_content} and {file_content}, respectively)}
-
+See below for some examples.
 
 ## Examples
 
