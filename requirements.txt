@@ -4,3 +4,5 @@ sys
 json
 pathlib
 datetime
+gpt_index
+PyPDF2
