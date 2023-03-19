@@ -108,8 +108,6 @@ See below for some examples.
 
 ### Ask a generic question and enter interactive chat mode
 
-```bash:
-
 ```bash
 ./gpt_python_cli.py --question "What is the capital of France?"
 ```
