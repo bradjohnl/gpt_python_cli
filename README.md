@@ -262,30 +262,69 @@ Do you want to continue the conversation? (y/n): n
 
 ### Use a custom prompt from the library
 
-In this example, we have added a custom prompt file named find_command.txt to the library directory. The prompt template is:
+#### JSON prompt
+In this example, we have added a custom prompt file named `pirate.json` to the library directory. The prompt template is:
 
 ```json
-{{"role": "system", "content": "You are a helpful assistant."}},
-{{"role": "user", "content": "Convert the following text to a Linux shell command. Just print the command without any other output: {input_content}"}}
+[
+	{
+		"role": "system", 
+		"content": "You are a pirate. You will act and reply as if you are one of the most feared pirates across all seas and oceans."	
+	},
+	{
+		"role": "user", 
+		"content": "{input_content}"
+	}
+]
 ```
 
 Run the following command to use the custom prompt:
 
 ```bash
-./gpt_python_cli.py --prompt find_command --print-only -q "Find all files in the current directory that contain the word 'test'"
+./gpt_python_cli.py -p pirate -q "How do I find the most precious treasure of all times?"
 ```
 
-#### Output
+##### Output
+
+```
+Ahoy there, me hearty! If ye be lookin' for the most precious treasure of all times, ye must be prepared to face great danger and challenges. The first step is to gather a crew of loyal and skilled pirates who are willing to follow ye to the ends of the earth. 
+
+Next, ye must acquire a map or clues that lead to the location of the treasure. This may involve negotiating with other pirates, stealing from wealthy merchants, or even battling sea monsters. 
+
+Once ye have the map or clues, ye must set sail and navigate through treacherous waters and unpredictable weather. Be prepared to face storms, reefs, and other obstacles that may stand in yer way. 
+
+When ye finally reach the location of the treasure, ye must be ready to defend it from other pirates who may also be seeking it. This may involve engaging in a fierce battle or using cunning tactics to outsmart yer opponents. 
+
+Remember, the most precious treasure of all times is not just gold and jewels, but also the thrill of the adventure and the camaraderie of yer crew. So set sail, me hearty, and may the winds be in yer favor!
+
+```
+
+#### Text prompt
+
+In this example, we have added a custom prompt file named `find_command.txt` to the library directory. The prompt template is:
+
+```txt
+Convert the following text to a linux shell command. Just print the command without any other output: {input_content}
+```
+
+Run the following command to use the custom prompt:
 
 ```bash
-grep -lir "test" .
+./gpt_python_cli.py -p find_command -q "Find a random number between 1 and 10"
+```
+
+##### Output
+
+```bash
+echo $((RANDOM % 10 + 1))
+Do you want to continue the conversation? (y/n):
 ```
 
 #### Additional explanation
 
 Furthermore, we have added the `--print-only` flag to only print the output of the command, without the prompt that allows us to continue the conversation.
 
-### Save the chat log to a default path:
+### Save the chat log to a default path
 
 ```bash
 ./gpt_python_cli.py --save-log --question "What is the purpose of a transformer in an electrical system?"
@@ -305,7 +344,7 @@ A transformer is a crucial component in an electrical system, serving several pu
 
 5. Phase shifting: In certain power system applications, transformers are employed to control the phase angle between voltage and current, which aids in power flow management and system stability.
 Do you want to continue the conversation? (y/n): n
-Chat log saved to /home/keepupdragon/.gpt_python_cli/logs/20230317_None.log
+Chat log saved to /home/test/.gpt_python_cli/logs/20230317_None.log
 ```
 
 #### Additional explanation
@@ -334,8 +373,6 @@ Contributions are welcome! If you'd like to help improve this project, please su
 If you'd like to share your custom prompt with the community, please submit a pull request to add it to the `prompts` directory.
 
 If you are using a JSON prompt, please make sure that the prompt is valid JSON. You can use a tool like [JSONLint](https://jsonlint.com/) to validate your JSON. You will still need to save it as a `.txt` file.
-
-Make sure you are using at least one placeholder in your prompt. The placeholder will be replaced with the user's input.
 
 ## License
 
