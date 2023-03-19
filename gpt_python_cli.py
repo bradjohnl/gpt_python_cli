@@ -38,9 +38,18 @@ def load_config():
         return json.load(file)
 
 def load_prompt(prompt_name, library_path):
-    prompt_file = os.path.join(library_path, f"{prompt_name}.txt")
-    with open(prompt_file, 'r') as file:
-        return file.read()
+    json_prompt_file = os.path.join(library_path, f"{prompt_name}.json")
+    txt_prompt_file = os.path.join(library_path, f"{prompt_name}.txt")
+
+    if os.path.isfile(json_prompt_file):
+        with open(json_prompt_file, 'r') as file:
+            return json.load(file)
+    elif os.path.isfile(txt_prompt_file):
+        with open(txt_prompt_file, 'r') as file:
+            return file.read()
+    else:
+        raise FileNotFoundError(f"Prompt file not found: {prompt_name}.json or {prompt_name}.txt")
+
       
 def get_standard_response(prompt, model, openai, tokens):
     response = openai.Completion.create(
@@ -93,6 +102,18 @@ def get_custom_data_response(input_text, index_path):
     response = index.query(input_text, response_mode="compact")
     return response.response
 
+def is_list_of_dicts(obj):
+    return isinstance(obj, list) and all(isinstance(item, dict) for item in obj)
+
+def format_list_of_dicts(list_of_dicts, input_content, file_content):
+    formatted_list = []
+    for item in list_of_dicts:
+        formatted_item = {}
+        for key, value in item.items():
+            formatted_item[key] = value.format(input_content=input_content, file_content=file_content)
+        formatted_list.append(formatted_item)
+    return formatted_list
+
 config = load_config()
 default_library_path = config.get('library_path', '')
 
@@ -109,6 +130,7 @@ tokens = 2000
 custom_data = False
 custom_data_path = None
 custom_data_index_path = None
+messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
 i = 1
 while i < len(sys.argv):
@@ -124,7 +146,7 @@ while i < len(sys.argv):
     elif arg in ('--model', '-m'):
         model = sys.argv[i + 1]
         if model not in config['models']:
-            print("Invalid model. Choose 'gpt-4'")
+            print("Invalid model")
             sys.exit(1)
         model = config['models'][model]
         i += 1
@@ -164,17 +186,22 @@ if file_path:
     with open(file_path, 'r') as file:
         file_content = file.read()
 
-messages = [{"role": "system", "content": "You are a helpful assistant."}]
-
 if custom_prompt:
-    formatted_prompt = custom_prompt.format(input_content=input_content, file_content=file_content)
-    messages.append({"role": "user", "content": formatted_prompt})
+    if is_list_of_dicts(custom_prompt):
+        custom_list_of_dicts = custom_prompt
+        formatted_list_of_dicts = format_list_of_dicts(custom_list_of_dicts, input_content, file_content)
+        messages = formatted_list_of_dicts
+    else:
+        formatted_prompt = custom_prompt.format(input_content=input_content, file_content=file_content)
+        messages.append({"role": "user", "content": formatted_prompt})
 
-if input_type == 'question':
+if input_type == 'question' and not custom_prompt:
     messages.append({"role": "user", "content": input_content})
     
-if input_type == 'question' and file_content:
+if input_type == 'question' and file_content and not custom_prompt:
     messages.append({"role": "user", "content": f"# {input_content}\n\n{file_content}"})
+
+print(messages)
 
 chat_log = []
 
@@ -182,6 +209,7 @@ if custom_data:
     construct_index(custom_data_path, custom_data_index_path)
 
 while True:
+  
     if custom_data:
         response_text = get_custom_data_response(messages[-1]["content"], custom_data_index_path)
     elif model == "gpt-4" or model == "gpt-3.5-turbo":
