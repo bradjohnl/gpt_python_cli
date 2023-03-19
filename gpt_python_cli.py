@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from gpt_index import SimpleDirectoryReader, GPTListIndex, GPTSimpleVectorIndex, LLMPredictor, PromptHelper
+from langchain import OpenAI
 import os
 import openai
 import sys
@@ -18,6 +20,8 @@ def print_help():
     print("  --print-only, -po                 Print the command without asking to continue")
     print("  --save-log, -sl                   Save the chat log to a default path")
     print("  --tokens, -t <tokens>             Specify the number of tokens to use (default: 2000)")
+    print("  --library-path, -lp <path>        Specify the docs library path for custom data (Other parameters except -q will not work when using custom data at the moment)")
+    print("  --index-path, -ip <path>          Specify the index path for custom data (Other parameters except -q will not work when using custom data at the moment)")
     print("  --help, -h                        Show this help message")
 
 def continue_conversation():
@@ -64,6 +68,30 @@ def get_chat_response(messages, model, openai, tokens):
         stop=[" A:"]
     )
     return response['choices'][0]['message']['content']
+  
+
+def construct_index(directory_path, index_path):
+    max_input_size = 4096
+    num_outputs = 512
+    max_chunk_overlap = 20
+    chunk_size_limit = 600
+
+    prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
+
+    llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.7, model_name="text-davinci-003", max_tokens=num_outputs))
+
+    documents = SimpleDirectoryReader(directory_path).load_data()
+
+    index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
+
+    index.save_to_disk(index_path)
+
+    return index
+  
+def get_custom_data_response(input_text, index_path):
+    index = GPTSimpleVectorIndex.load_from_disk(index_path)
+    response = index.query(input_text, response_mode="compact")
+    return response.response
 
 config = load_config()
 default_library_path = config.get('library_path', '')
@@ -78,6 +106,9 @@ print_only = False
 save_log = False
 prompt_name = None
 tokens = 2000
+custom_data = False
+custom_data_path = None
+custom_data_index_path = None
 
 i = 1
 while i < len(sys.argv):
@@ -111,6 +142,14 @@ while i < len(sys.argv):
     elif arg in ('--tokens', '-t'):
         tokens = int(sys.argv[i + 1])
         i += 1
+    elif arg in ('--library-path', '-lp'):
+        custom_data = True
+        custom_data_path = sys.argv[i + 1]
+        i += 1
+    elif arg in ('--index-path', '-ip'):
+        custom_data = True
+        custom_data_index_path = sys.argv[i + 1]
+        i += 1
     else:
         print(f"Unknown option '{arg}'")
         print_help()
@@ -139,8 +178,13 @@ if input_type == 'question' and file_content:
 
 chat_log = []
 
+if custom_data:
+    construct_index(custom_data_path, custom_data_index_path)
+
 while True:
-    if model == "gpt-4" or model == "gpt-3.5-turbo":
+    if custom_data:
+        response_text = get_custom_data_response(messages[-1]["content"], custom_data_index_path)
+    elif model == "gpt-4" or model == "gpt-3.5-turbo":
         response_text = get_chat_response(messages, model, openai, tokens)
     else:
         prompt = messages[-1]["content"]
