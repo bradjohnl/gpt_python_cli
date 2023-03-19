@@ -19,10 +19,11 @@ An unofficial Python-based command-line interface (CLI) for interacting with Ope
 - Use custom prompts from a library. Create and edit your prompts and share them with others!
 - Save chat logs to a specified path
 - Interactive chat mode or one-shot mode
-- Customize model options like temperature and token limits (COMING SOON)
-- Syntax highlighting for code output (COMING SOON)
-- Save valid prompts for future model training (COMING SOON)
-- Online portal for sharing custom prompts (COMING SOON)
+- Customize model options like temperature and token limits
+- Syntax highlighting for code output (COMING SOON?)
+- Save valid prompts for future model training (COMING SOON?)
+- Online portal for sharing custom prompts (COMING SOON?)
+- Run ChatGPT against custom data (COMING SOON?)
 
 ## Installation
 
@@ -62,7 +63,7 @@ cp config_sample.json ~/.gpt_python_cli/config.json
 ## Usage
 
 ```bash
-./openai_cli.py [options]
+./gpt_python_cli.py [options]
 
 Options:
 
@@ -72,6 +73,7 @@ Options:
     --prompt, -p <prompt_name>: Use a custom prompt from the library
     --print-only, -po: Print the command without asking to continue
     --save-log, -sl: Save the chat log to a default path
+    --tokens, -t <tokens> Specify the number of tokens to use (default: 2000)
     --help, -h: Show the help message
 
 ```
@@ -82,8 +84,13 @@ Create a JSON configuration file at ~/.gpt_python_cli/config.json with the follo
 
 ```json
 {
-  "library_path": "/path/to/your/custom/prompts/directory",
-  "log_path": "/path/to/your/chat/logs/directory"
+  "library_path": "/home/user/.gpt_python_cli/library",
+  "log_path": "/home/user/.gpt_python_cli/logs",
+  "models": {
+    "gpt-4": "gpt-4",
+    "text": "text-davinci-003",
+    "code": "code-davinci-002"
+  }
 }
 ```
 
@@ -103,7 +110,7 @@ Create a text file inside your custom prompts directory with the same name as yo
 To use a custom prompt with the CLI, run:
 
 ```bash
-./openai_cli.py --prompt custom_prompt_name --file input.txt
+./gpt_python_cli.py --prompt custom_prompt_name --file input.txt
 ```
 
 Replace custom_prompt_name with the name of your custom prompt (without the extension).
@@ -119,7 +126,7 @@ Don't forget to include placeholders for the user's input and file content! ({in
 ```bash:
 
 ```bash
-./openai_cli.py --question "What is the capital of France?"
+./gpt_python_cli.py --question "What is the capital of France?"
 ```
 
 #### Output:
@@ -169,7 +176,7 @@ import json
 import tempfile
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta
-from openai_cli import print_help, continue_conversation, load_config, load_prompt
+from gpt_python_cli import print_help, continue_conversation, load_config, load_prompt
 
 class TestOpenAICLI(unittest.TestCase):
 
@@ -218,6 +225,21 @@ if __name__ == '__main__':
     unittest.main()
 ```
 
+### Use other models
+
+In this example, we use the text model from our config example (text-davinci-003).
+
+```bash
+./gpt_python_cli.py --model text --question "What is the capital of France?"
+```
+
+#### Output:
+
+```bash
+Paris.
+Do you want to continue the conversation? (y/n): n
+```
+
 ### Use a custom prompt from the library
 
 In this example, we have added a custom prompt file named find_command.txt to the library directory. The prompt template is:
@@ -263,7 +285,7 @@ A transformer is a crucial component in an electrical system, serving several pu
 
 5. Phase shifting: In certain power system applications, transformers are employed to control the phase angle between voltage and current, which aids in power flow management and system stability.
 Do you want to continue the conversation? (y/n): n
-Chat log saved to /home/keepupdragon/.openai_cli/logs/20230317_None.log
+Chat log saved to /home/keepupdragon/.gpt_python_cli/logs/20230317_None.log
 ```
 
 #### Additional explanation
