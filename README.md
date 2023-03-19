@@ -100,7 +100,7 @@ Replace the values with the paths to your custom prompts and chat logs directori
 
 ## Custom Prompts
 
-Custom prompts are text files containing a prompt template that you can use with the CLI. You can use placeholders like {input_content} and {file_content} to represent the user's input and the content of a file, respectively.
+Custom prompts are text and JSON files containing a prompt template that you can use with the CLI. You can use placeholders like {input_content} and {file_content} to represent the user's input and the content of a file, respectively.
 
 See below for some examples.
 
