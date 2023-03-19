@@ -17,6 +17,7 @@ def print_help():
     print("  --prompt, -p <prompt_name>        Use a custom prompt from the library")
     print("  --print-only, -po                 Print the command without asking to continue")
     print("  --save-log, -sl                   Save the chat log to a default path")
+    print("  --tokens, -t <tokens>             Specify the number of tokens to use (default: 2000)")
     print("  --help, -h                        Show this help message")
 
 def continue_conversation():
@@ -36,6 +37,33 @@ def load_prompt(prompt_name, library_path):
     prompt_file = os.path.join(library_path, f"{prompt_name}.txt")
     with open(prompt_file, 'r') as file:
         return file.read()
+      
+def get_standard_response(prompt, model, openai, tokens):
+    response = openai.Completion.create(
+        engine=model,
+        prompt=prompt,
+        temperature=0,
+        max_tokens=tokens,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=[" A:"]
+    )
+    return response.choices[0].text.strip()
+  
+def get_chat_response(messages, model, openai, tokens):
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=messages,
+        max_tokens=tokens,
+        n=1,
+        temperature=0,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=[" A:"]
+    )
+    return response['choices'][0]['message']['content']
 
 config = load_config()
 default_library_path = config.get('library_path', '')
@@ -49,6 +77,7 @@ custom_prompt = None
 print_only = False
 save_log = False
 prompt_name = None
+tokens = 2000
 
 i = 1
 while i < len(sys.argv):
@@ -63,9 +92,10 @@ while i < len(sys.argv):
         i += 1
     elif arg in ('--model', '-m'):
         model = sys.argv[i + 1]
-        if model not in ["gpt-4"]:
+        if model not in config['models']:
             print("Invalid model. Choose 'gpt-4'")
             sys.exit(1)
+        model = config['models'][model]
         i += 1
     elif arg in ('--file', '-f'):
         file_path = sys.argv[i + 1]
@@ -78,6 +108,9 @@ while i < len(sys.argv):
         print_only = True
     elif arg in ('--save-log', '-sl'):
         save_log = True
+    elif arg in ('--tokens', '-t'):
+        tokens = int(sys.argv[i + 1])
+        i += 1
     else:
         print(f"Unknown option '{arg}'")
         print_help()
@@ -107,19 +140,12 @@ if input_type == 'question' and file_content:
 chat_log = []
 
 while True:
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=messages,
-        max_tokens=2048,
-        n=1,
-        temperature=0.9,
-        top_p=1,
-        frequency_penalty=0,
-        presence_penalty=0.6,
-        stop=[" A:"]
-    )
+    if model == "gpt-4" or model == "gpt-3.5-turbo":
+        response_text = get_chat_response(messages, model, openai, tokens)
+    else:
+        prompt = messages[-1]["content"]
+        response_text = get_standard_response(prompt, model, openai, tokens)
 
-    response_text = response['choices'][0]['message']['content']
     print(response_text)
     chat_log.append(response_text)
 

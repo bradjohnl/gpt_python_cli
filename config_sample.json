@@ -1,4 +1,9 @@
 {
   "library_path": "/home/user/.howto/library",
-  "log_path": "/home/user/.howto/logs"
+  "log_path": "/home/user/.howto/logs",
+  "models": {
+    "gpt-4": "gpt-4",
+    "text": "text-davinci-003",
+    "code": "code-davinci-002"
+  }
 }
