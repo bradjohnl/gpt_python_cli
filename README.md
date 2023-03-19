@@ -23,7 +23,7 @@ An unofficial Python-based command-line interface (CLI) for interacting with Ope
 - Syntax highlighting for code output (COMING SOON?)
 - Save valid prompts for future model training (COMING SOON?)
 - Online portal for sharing custom prompts (COMING SOON?)
-- Run ChatGPT against custom data (COMING SOON?)
+- Run ChatGPT against custom data (Thanks to https://beebom.com/how-train-ai-chatbot-custom-knowledge-base-chatgpt-api/)
 
 ## Installation
 
@@ -74,6 +74,8 @@ Options:
     --print-only, -po: Print the command without asking to continue
     --save-log, -sl: Save the chat log to a default path
     --tokens, -t <tokens> Specify the number of tokens to use (default: 2000)
+    --library-path, -lp <path>        Specify the docs library path for custom data (Other parameters except -q will not work when using custom data at the moment)
+    --index-path, -ip <path>          Specify the index path for custom data (Other parameters except -q will not work when using custom data at the moment)
     --help, -h: Show the help message
 
 ```
@@ -94,7 +96,7 @@ Create a JSON configuration file at ~/.gpt_python_cli/config.json with the follo
 }
 ```
 
-Replace `/path/to/your/custom/prompts/directory` and `/path/to/your/chat/logs/directory` with the paths to your custom prompts and chat logs directories, respectively.
+Replace the values with the paths to your custom prompts and chat logs directories, respectively. You can also customize the model names to use for each model type.
 
 ## Custom Prompts
 
@@ -240,6 +242,24 @@ Paris.
 Do you want to continue the conversation? (y/n): n
 ```
 
+### Use custom data from a file
+
+We have the bitcoin whitepaper in the library directory. 
+Now we can ask questions about the document in the following way:
+
+```bash
+./gpt_python_cli.py --library-path ./btc_whitepaper --index-path ./btc_whitepaper/index.json  --question "What is this document about"?"
+```
+
+#### Output:
+
+
+```bash
+This document is about a proposed solution to the double-spending problem using a peer-to-peer network. It explains how digital signatures can provide part of the solution, and how the network can timestamp transactions by hashing them into an ongoing chain of hash-based proof-of-work. It also discusses how the longest chain serves as proof of the sequence of events witnessed, and how the network requires minimal structure.
+Do you want to continue the conversation? (y/n): n
+
+```
+
 ### Use a custom prompt from the library
 
 In this example, we have added a custom prompt file named find_command.txt to the library directory. The prompt template is:
@@ -295,6 +315,18 @@ You may notice that the log file name is `20230317_None.log`. This is because th
 ## Contributing
 
 Contributions are welcome! If you'd like to help improve this project, please submit a pull request with your changes or create an issue to discuss your ideas.
+
+## TODOs:
+
+- [ ] Add support for other models (e.g. image, audio, etc.)
+- [ ] Add support for custom prompt on custom data.
+- [ ] Add pre-commit config
+- [ ] Add Pr templates.
+- [ ] Add issue templates.
+- [ ] Add contributing guidelines.
+- [ ] Add Docker support.
+- [ ] Colorized output to distinguish questions and answers.
+- [ ] Syntax highlighting for code snippets.
 
 ### Public prompts
 
