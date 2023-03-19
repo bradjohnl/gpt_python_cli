@@ -201,8 +201,6 @@ if input_type == 'question' and not custom_prompt:
 if input_type == 'question' and file_content and not custom_prompt:
     messages.append({"role": "user", "content": f"# {input_content}\n\n{file_content}"})
 
-print(messages)
-
 chat_log = []
 
 if custom_data:
