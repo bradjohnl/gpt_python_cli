@@ -327,6 +327,7 @@ Contributions are welcome! If you'd like to help improve this project, please su
 - [ ] Add Docker support.
 - [ ] Colorized output to distinguish questions and answers.
 - [ ] Syntax highlighting for code snippets.
+- [ ] Fetch custom data from websites.
 
 ### Public prompts
 
