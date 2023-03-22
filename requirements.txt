@@ -1,7 +1,4 @@
-os
 openai
-sys
-json
 pathlib
 datetime
 gpt_index
