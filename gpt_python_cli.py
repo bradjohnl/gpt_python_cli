@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from gpt_index import SimpleDirectoryReader, GPTListIndex, GPTSimpleVectorIndex, LLMPredictor, PromptHelper
+from gpt_index import JSONReader, SimpleDirectoryReader, GPTListIndex, GPTSimpleVectorIndex, LLMPredictor, PromptHelper
 from langchain import OpenAI
 import os
 import openai
@@ -89,7 +89,18 @@ def construct_index(directory_path, index_path):
 
     llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.7, model_name="text-davinci-003", max_tokens=num_outputs))
 
-    documents = SimpleDirectoryReader(directory_path).load_data()
+    documents = []
+
+    # check if the documents are in JSON format
+    if any(file.endswith(".json") for file in os.listdir(directory_path)):
+        reader = JSONReader()
+        for file in os.listdir(directory_path):
+            if file.endswith(".json"):
+                input_file = os.path.join(directory_path, file)
+                documents += reader.load_data(input_file)
+    else:
+        reader = SimpleDirectoryReader(directory_path)
+        documents = reader.load_data()
 
     index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
 
@@ -204,7 +215,10 @@ if input_type == 'question' and file_content and not custom_prompt:
 chat_log = []
 
 if custom_data:
-    construct_index(custom_data_path, custom_data_index_path)
+    # Do not recreate index if it already exists
+    if not os.path.exists(custom_data_index_path):
+        construct_index(custom_data_path, custom_data_index_path)
+    
 
 while True:
   
