@@ -336,6 +336,9 @@ You may notice that the log file name is `20230317_None.log`. This is because th
 
 Contributions are welcome! If you'd like to help improve this project, please submit a pull request with your changes or create an issue to discuss your ideas.
 
+## Known issues:
+- [ ] JSON data needs to be split into approx. 1MB chunks otherwise the error: `AssertionError: The batch size should not be larger than 2048.` will occur. There is an open bug on gpt_index tracking this issue: https://github.com/jerryjliu/gpt_index/issues/517
+
 ## TODOs:
 
 - [ ] Add support for other models (e.g. image, audio, etc.)
@@ -353,7 +356,7 @@ Contributions are welcome! If you'd like to help improve this project, please su
 
 If you'd like to share your custom prompt with the community, please submit a pull request to add it to the `prompts` directory.
 
-If you are using a JSON prompt, please make sure that the prompt is valid JSON. You can use a tool like [JSONLint](https://jsonlint.com/) to validate your JSON. You will still need to save it as a `.txt` file.
+If you are using a JSON prompt, please make sure that the prompt is valid JSON. You can use a tool like [JSONLint](https://jsonlint.com/) to validate your JSON.
 
 ## License
 
