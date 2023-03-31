@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from gpt_index import JSONReader, SimpleDirectoryReader, GPTListIndex, GPTSimpleVectorIndex, LLMPredictor, PromptHelper
+import pickle
 from langchain import OpenAI
 import os
 import openai
@@ -8,8 +8,11 @@ import sys
 import json
 import pathlib
 from datetime import datetime
+from multiprocessing import Lock
+from gpt_index import SimpleDirectoryReader, GPTSimpleVectorIndex
 
-openai.api_key = os.environ.get('OPENAI_API_KEY')
+# index = None
+lock = Lock()
 
 def print_help():
     print("Usage:")
@@ -20,8 +23,8 @@ def print_help():
     print("  --print-only, -po                 Print the command without asking to continue")
     print("  --save-log, -sl                   Save the chat log to a default path")
     print("  --tokens, -t <tokens>             Specify the number of tokens to use (default: 2000)")
-    print("  --library-path, -lp <path>        Specify the docs library path for custom data (Other parameters except -q will not work when using custom data at the moment)")
-    print("  --index-path, -ip <path>          Specify the index path for custom data (Other parameters except -q will not work when using custom data at the moment)")
+    print("  --add-to-index, -ai <file_path>   Add a file to the custom index")
+    print("  --index-path, -ip <index_path>    Specify the directory path where the custom index is located be used with custom data")
     print("  --help, -h                        Show this help message")
 
 def continue_conversation():
@@ -77,41 +80,6 @@ def get_chat_response(messages, model, openai, tokens):
         stop=[" A:"]
     )
     return response['choices'][0]['message']['content']
-  
-
-def construct_index(directory_path, index_path):
-    max_input_size = 4096
-    num_outputs = 512
-    max_chunk_overlap = 20
-    chunk_size_limit = 600
-
-    prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap, chunk_size_limit=chunk_size_limit)
-
-    llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.7, model_name="text-davinci-003", max_tokens=num_outputs))
-
-    documents = []
-
-    # check if the documents are in JSON format
-    if any(file.endswith(".json") for file in os.listdir(directory_path)):
-        reader = JSONReader()
-        for file in os.listdir(directory_path):
-            if file.endswith(".json"):
-                input_file = os.path.join(directory_path, file)
-                documents += reader.load_data(input_file)
-    else:
-        reader = SimpleDirectoryReader(directory_path)
-        documents = reader.load_data()
-
-    index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-
-    index.save_to_disk(index_path)
-
-    return index
-  
-def get_custom_data_response(input_text, index_path):
-    index = GPTSimpleVectorIndex.load_from_disk(index_path)
-    response = index.query(input_text, response_mode="compact")
-    return response.response
 
 def is_list_of_dicts(obj):
     return isinstance(obj, list) and all(isinstance(item, dict) for item in obj)
@@ -124,6 +92,39 @@ def format_list_of_dicts(list_of_dicts, input_content, file_content):
             formatted_item[key] = value.format(input_content=input_content, file_content=file_content)
         formatted_list.append(formatted_item)
     return formatted_list
+  
+def initialize_index(doc_path):
+    """Create a new global index, or load one from the pre-set path."""
+    global index
+    index_path = f"{os.path.dirname(os.path.abspath(doc_path))}/.index.json"
+
+    with lock:
+        if os.path.exists(index_path):
+            print("Loaded index from disk")
+            index = GPTSimpleVectorIndex.load_from_disk(index_path)
+        else:
+            index = GPTSimpleVectorIndex([])
+            index.save_to_disk(index_path)
+
+def get_custom_data_response(input_text, index_path):
+    index = GPTSimpleVectorIndex.load_from_disk(f"{index_path}/.index.json")
+    response = index.query(input_text, response_mode="compact")
+    return response.response
+
+
+def insert_into_index(doc_file_path, doc_id=None):
+    """Insert new document into global index."""
+    global index
+    index_path = f"{os.path.dirname(os.path.abspath(doc_path))}/.index.json"
+    document = SimpleDirectoryReader(input_files=[doc_file_path]).load_data()[0]
+    if doc_id is not None:
+        document.doc_id = doc_id
+
+    with lock:
+        index.insert(document)
+        index.save_to_disk(index_path)
+
+    return
 
 config = load_config()
 default_library_path = config.get('library_path', '')
@@ -175,13 +176,16 @@ while i < len(sys.argv):
     elif arg in ('--tokens', '-t'):
         tokens = int(sys.argv[i + 1])
         i += 1
-    elif arg in ('--library-path', '-lp'):
+    elif arg in ("--add-to-index", "-ai"):
         custom_data = True
-        custom_data_path = sys.argv[i + 1]
-        i += 1
-    elif arg in ('--index-path', '-ip'):
+        doc_path = sys.argv[i + 1]
+        initialize_index(doc_path)
+        insert_into_index(doc_path)
+        sys.exit(0)
+    elif arg in ("--index-path", "-ip"):
         custom_data = True
         custom_data_index_path = sys.argv[i + 1]
+        initialize_index(custom_data_index_path)
         i += 1
     else:
         print(f"Unknown option '{arg}'")
@@ -212,13 +216,7 @@ if input_type == 'question' and not custom_prompt:
 if input_type == 'question' and file_content and not custom_prompt:
     messages.append({"role": "user", "content": f"# {input_content}\n\n{file_content}"})
 
-chat_log = []
-
-if custom_data:
-    # Do not recreate index if it already exists
-    if not os.path.exists(custom_data_index_path):
-        construct_index(custom_data_path, custom_data_index_path)
-    
+chat_log = []    
 
 while True:
   
