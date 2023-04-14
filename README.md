@@ -402,6 +402,7 @@ Contributions are welcome! If you'd like to help improve this project, please su
 
 - [ ] Add support for other models (e.g. image, audio, etc.)
 - [ ] Add support for custom prompt on custom data.
+- [ ] Add support for babyagi, Auto-GPT, LLAMA-cpp, and other interfaces.
 - [ ] Add pre-commit config
 - [ ] Add Pr templates.
 - [ ] Add issue templates.
