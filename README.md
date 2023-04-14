@@ -4,7 +4,9 @@
 
 This project, GPT_Python_CLI, is an independently developed tool and is not affiliated with, endorsed, or supported by OpenAI Inc. It is not an official client for the OpenAI API, nor is it developed or maintained by OpenAI.
 
-The GPT_Python_CLI project aims to provide a convenient command-line interface for users to interact with GPT-4 language models through the OpenAI API. Any opinions, findings, conclusions, or recommendations expressed in this project are those of the author(s) and do not necessarily reflect the views of OpenAI Inc.
+It also allows you to use the gpt_index Python library to index your custom data and use it with the ChatGPT API. This is a great way to train your own custom AI chatbot using the ChatGPT API. You can find more information about the gpt_index (LLama index) library here: https://gpt-index.readthedocs.io/en/latest/index.html
+
+The GPT_Python_CLI project aims to provide a convenient command-line interface for users to interact with language models through the OpenAI API. Any opinions, findings, conclusions, or recommendations expressed in this project are those of the author(s) and do not necessarily reflect the views of OpenAI Inc.
 
 Please refer to OpenAI's official documentation for the most accurate and up-to-date information regarding the OpenAI API, GPT models, and their usage.
 
@@ -67,16 +69,16 @@ cp config_sample.json ~/.gpt_python_cli/config.json
 
 Options:
 
-    --question, -q <question>: Ask a generic question
-    --model, -m <model>: Specify the model to use (gpt-4 only for the moment)
-    --file, -f <file_path>: Use a file as input for the model
-    --prompt, -p <prompt_name>: Use a custom prompt from the library
-    --print-only, -po: Print the command without asking to continue
-    --save-log, -sl: Save the chat log to a default path
-    --tokens, -t <tokens> Specify the number of tokens to use (default: 2000)
-    --library-path, -lp <path>        Specify the docs library path for custom data (Other parameters except -q will not work when using custom data at the moment)
-    --index-path, -ip <path>          Specify the index path for custom data (Other parameters except -q will not work when using custom data at the moment)
-    --help, -h: Show the help message
+  --question, -q <question>         Ask a generic question
+  --model, -m <model>               Specify the model to use (gpt-4 only for the moment)
+  --file, -f <file_path>            Use a file as input for the model
+  --prompt, -p <prompt_name>        Use a custom prompt from the library
+  --print-only, -po                 Print the command without asking to continue
+  --save-log, -sl                   Save the chat log to a default path
+  --tokens, -t <tokens>             Specify the number of tokens to use (default: 2000)
+  --add-to-index, -ai <file_path>   Add a file to the custom index
+  --index-path, -ip <index_path>    Specify the directory path where the custom index is located be used with custom data
+  --help, -h                        Show this help message
 
 ```
 
@@ -229,16 +231,73 @@ We have the bitcoin whitepaper in the library directory.
 Now we can ask questions about the document in the following way:
 
 ```bash
-./gpt_python_cli.py --library-path ./btc_whitepaper --index-path ./btc_whitepaper/index.json  --question "What is this document about"?"
+cd btc_whitepaper
+./gpt_python_cli.py --ai btc_whitepaper.pdf
+./gpt_python_cli.py --ip .index.json --question "What is the double-spending problem?"
 ```
-
-#### Output:
-
 
 ```bash
 This document is about a proposed solution to the double-spending problem using a peer-to-peer network. It explains how digital signatures can provide part of the solution, and how the network can timestamp transactions by hashing them into an ongoing chain of hash-based proof-of-work. It also discusses how the longest chain serves as proof of the sequence of events witnessed, and how the network requires minimal structure.
 Do you want to continue the conversation? (y/n): n
 
+```
+
+### Add multiple files to the index and use them in the conversation
+
+Let's add all the files in the current repository to the index:
+```bash
+cd gpt_python_cli
+for i in $(ls); do ./gpt_python_cli.py -ai $i; done; 
+./gpt_python_cli.py --ip . --question "What is this repo about?"
+```
+
+#### Output:
+
+```bash
+Loaded index from disk
+INFO:gpt_index.token_counter.token_counter:> [query] Total LLM token usage: 87 tokens
+INFO:gpt_index.token_counter.token_counter:> [query] Total embedding token usage: 6 tokens
+
+This repo appears to be about using Python libraries such as openai, pathlib, datetime, PyPDF2, and gpt_index to create and manipulate data.
+Do you want to continue the conversation? (y/n): y
+Enter your next message (Press enter twice to finish):
+What is the license used? Am I allowed it to use this code for commercial purposes?
+
+INFO:gpt_index.token_counter.token_counter:> [query] Total LLM token usage: 564 tokens
+INFO:gpt_index.token_counter.token_counter:> [query] Total embedding token usage: 18 tokens
+
+The license used is Creative Commons Attribution-NonCommercial 4.0 International. You are not allowed to use this code for commercial purposes.
+```
+
+### Add multiple files recursing into subfolders to the same index and use them in the conversation
+
+In this example, we want to ask questions about the Auto-GPT repo: https://github.com/Torantulino/Auto-GPT
+
+
+```bash
+find . -type f -not -path '*/\.*' -exec gpt_python_cli.py -ip .index.json -ai {} \;
+gpt_python_cli.py -ip . -q "What's the azure.yaml.template file for?"
+```
+
+**Output:**
+
+```bash
+Loaded index from disk
+INFO:gpt_index.token_counter.token_counter:> [query] Total LLM token usage: 245 tokens
+INFO:gpt_index.token_counter.token_counter:> [query] Total embedding token usage: 14 tokens
+The azure.yaml.template file is used to configure the Azure API for use with the specified models. It contains the API type, base URL, version, and model deployment IDs for the fast_llm_model, smart_llm_model, and embedding_model.
+```
+
+Now let's ask a question about a file in a subfolder:
+```bash 
+gpt_python_cli.py -ip . -q "What's the ai_config.py file for?"
+```
+
+**Output**
+
+```text
+The ai_config.py file is a class object that contains the configuration information for the AI. It is used to store the AI's name, role, and goals, and can be used to generate a prompt for the user. It also has methods to save and load the configuration information from a yaml file.
+Do you want to continue the conversation? (y/n):
 ```
 
 ### Use a custom prompt from the library
