@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import pickle
 from langchain import OpenAI
 import os
 import openai
@@ -11,7 +10,6 @@ from datetime import datetime
 from multiprocessing import Lock
 from gpt_index import SimpleDirectoryReader, GPTSimpleVectorIndex
 
-# index = None
 lock = Lock()
 
 def print_help():
@@ -108,23 +106,21 @@ def initialize_index(doc_path):
 
 def get_custom_data_response(input_text, index_path):
     index = GPTSimpleVectorIndex.load_from_disk(f"{index_path}/.index.json")
+    # print("Loaded index from disk: ", index_path)
     response = index.query(input_text, response_mode="compact")
     return response.response
 
 
-def insert_into_index(doc_file_path, doc_id=None):
+def insert_into_index(doc_file_path, index_path=None):
     """Insert new document into global index."""
     global index
-    index_path = f"{os.path.dirname(os.path.abspath(doc_path))}/.index.json"
+    if index_path is None:
+        index_path = f"{os.path.dirname(os.path.abspath(doc_path))}/.index.json"
     document = SimpleDirectoryReader(input_files=[doc_file_path]).load_data()[0]
-    if doc_id is not None:
-        document.doc_id = doc_id
-
+        
     with lock:
         index.insert(document)
         index.save_to_disk(index_path)
-
-    return
 
 config = load_config()
 default_library_path = config.get('library_path', '')
@@ -142,6 +138,8 @@ tokens = 2000
 custom_data = False
 custom_data_path = None
 custom_data_index_path = None
+add_to_index = False
+custom_index = False
 messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
 i = 1
@@ -178,21 +176,32 @@ while i < len(sys.argv):
         i += 1
     elif arg in ("--add-to-index", "-ai"):
         custom_data = True
+        add_to_index = True
         doc_path = sys.argv[i + 1]
-        initialize_index(doc_path)
-        insert_into_index(doc_path)
-        sys.exit(0)
+        i += 1
     elif arg in ("--index-path", "-ip"):
         custom_data = True
+        custom_index = True
         custom_data_index_path = sys.argv[i + 1]
-        initialize_index(custom_data_index_path)
         i += 1
     else:
         print(f"Unknown option '{arg}'")
         print_help()
         sys.exit(1)
-    
     i += 1
+
+
+    
+if custom_data and add_to_index and custom_index:
+    initialize_index(custom_data_index_path)
+    insert_into_index(doc_path, custom_data_index_path)
+    sys.exit(0)
+elif custom_data and add_to_index and not custom_index:
+    initialize_index(doc_path)
+    insert_into_index(doc_path)
+    sys.exit(0)
+elif custom_data and custom_index:
+    initialize_index(custom_data_index_path)
 
 if model is None:
     model = "gpt-4"
