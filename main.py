@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from langchain import OpenAI
+#from transformers import OpenAiAgent
+import huggingface_hub
 import os
 import openai
 import sys
@@ -140,7 +142,10 @@ custom_data_path = None
 custom_data_index_path = None
 add_to_index = False
 custom_index = False
+#transformer = None
 messages = [{"role": "system", "content": "You are a helpful assistant."}]
+# login(os.environ["HUGGINGFACE_API_KEY"])
+#agent = OpenAiAgent(model="text-davinci-003", api_key=os.environ["OPENAI_API_KEY"])
 
 i = 1
 while i < len(sys.argv):
@@ -184,6 +189,9 @@ while i < len(sys.argv):
         custom_index = True
         custom_data_index_path = sys.argv[i + 1]
         i += 1
+    # elif arg in ("--transformer", "-tr"):
+    #     transformer = True
+    #     i += 1   
     else:
         print(f"Unknown option '{arg}'")
         print_help()
@@ -206,7 +214,7 @@ elif custom_data and custom_index:
 if model is None:
     model = "gpt-4"
 
-if file_path:
+if file_path: # and no transformer
     with open(file_path, 'r') as file:
         file_content = file.read()
 
@@ -228,8 +236,18 @@ if input_type == 'question' and file_content and not custom_prompt:
 chat_log = []    
 
 while True:
-  
-    if custom_data:
+    # if transformer:
+    #   if file_path:
+    #     if file_path.endswith((".pdf", ".docx", ".doc", ".txt", ".csv", ".xlsx", ".xls", ".json", ".html", ".xml", ".pptx", ".ppt", ".odt", ".ods", ".odp", ".rtf", ".tex", ".wks", ".wps", ".wpd")):
+    #       response_text=agent.chat(messages[-1]["content"], document=file_path)
+    #     elif file_path.endswith((".png", ".jpg", ".jpeg", ".gif", ".svg")):
+    #       print(messages[-1]["content"])
+    #       response_text=agent.chat(messages[-1]["content"], image=file_path)
+    #     else:
+    #       response_text=agent.chat(messages[-1]["content"], document=file_path)
+    #   else:
+    #     response_text=agent.chat(messages[-1]["content"])
+    if custom_data: #elif
         response_text = get_custom_data_response(messages[-1]["content"], custom_data_index_path)
     elif model == "gpt-4" or model == "gpt-3.5-turbo":
         response_text = get_chat_response(messages, model, openai, tokens)
