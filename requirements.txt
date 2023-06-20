@@ -1,5 +1,0 @@
-openai
-pathlib
-datetime
-gpt_index
-PyPDF2
