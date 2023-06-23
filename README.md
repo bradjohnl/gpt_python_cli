@@ -12,6 +12,8 @@ Please refer to OpenAI's official documentation for the most accurate and up-to-
 
 ## Introduction
 
+**README is outdated, have to find time to update it. Cosa is being used as dependency management, so no requirements.txt. You can check older versions for requirements.txt content and figure out the packages also from the environment.**
+
 An unofficial Python-based command-line interface (CLI) for interacting with OpenAI's GPT-4 model. With this CLI, you can ask questions, generate text, and use custom prompts to control the model's output.
 
 ## Features
@@ -26,6 +28,10 @@ An unofficial Python-based command-line interface (CLI) for interacting with Ope
 - Save valid prompts for future model training (COMING SOON?)
 - Online portal for sharing custom prompts (COMING SOON?)
 - Run ChatGPT against custom data (Thanks to https://beebom.com/how-train-ai-chatbot-custom-knowledge-base-chatgpt-api/)
+- Send queries to Bing (WIP)
+- Send queries simultaneously to Bing and ChatGPT (WIP)
+- Support local models (a la localGPT) (WIP)
+- Support voice, transcribe, automated send based on wake-word (Working on it as a separate repo, not sure if I should centralize) (WIP).
 
 ## Installation
 
