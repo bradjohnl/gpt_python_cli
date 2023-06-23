@@ -158,6 +158,9 @@ These are just a few examples of the many attractions that make Paris a beloved 
 ./gpt_python_cli.py --file gpt_python_cli.py --question "Generate unit tests for the following code:"
 ```
 
+**Tip:**
+Include the `-q` option with an empty string (`-q ""`) if you wish to just use your file alone as input.
+
 #### Output:
 
 ```python
