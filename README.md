@@ -12,7 +12,7 @@ Please refer to OpenAI's official documentation for the most accurate and up-to-
 
 ## Introduction
 
-**README is outdated, have to find time to update it. Cosa is being used as dependency management, so no requirements.txt. You can check older versions for requirements.txt content and figure out the packages also from the environment.**
+**README is outdated, have to find time to update it. Conda is being used as dependency management, so no requirements.txt. You can check older versions for requirements.txt content and figure out the packages also from the environment.yml file**
 
 An unofficial Python-based command-line interface (CLI) for interacting with OpenAI's GPT-4 model. With this CLI, you can ask questions, generate text, and use custom prompts to control the model's output.
 
