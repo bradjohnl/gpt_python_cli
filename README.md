@@ -39,32 +39,32 @@ An unofficial Python-based command-line interface (CLI) for interacting with Ope
   git clone https://github.com/bradjohnl/gpt_python_cli.git
   ```
 
-1. Navigate to the repository directory:
+2. Navigate to the repository directory:
 
 ```bash
 cd gpt_python_cli
 ```
 
-1. [Install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and create a new environment:
+3. [Install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and create a new environment:
 
 ```bash
 conda create -n gpt_python_cli -f environment.yml
 ```
 
-1. Set up an OpenAI API key as an environment variable:
+4. Set up an OpenAI API key as an environment variable:
 
 ```bash
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
-1. Create a configuration file in your home directory:
+5. Create a configuration file in your home directory:
 
 ```bash
 mkdir ~/.gpt_python_cli
 cp config_sample.json ~/.gpt_python_cli/config.json
 ```
 
-1. Customize the paths in config.json
+6. Customize the paths in config.json
 
 ## Usage
 
