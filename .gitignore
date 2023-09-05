@@ -3,3 +3,4 @@ cookies.json
 library/
 logs/
 .cache
+.mypy_cache/
