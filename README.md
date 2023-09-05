@@ -4,15 +4,13 @@
 
 This project, GPT_Python_CLI, is an independently developed tool and is not affiliated with, endorsed, or supported by OpenAI Inc. It is not an official client for the OpenAI API, nor is it developed or maintained by OpenAI.
 
-It also allows you to use the gpt_index Python library to index your custom data and use it with the ChatGPT API. This is a great way to train your own custom AI chatbot using the ChatGPT API. You can find more information about the gpt_index (LLama index) library here: https://gpt-index.readthedocs.io/en/latest/index.html
+It also allows you to use the gpt_index Python library to index your custom data and use it with the ChatGPT API. This is a great way to train your own custom AI chatbot using the ChatGPT API. You can find more information about the gpt_index (LLama index) library [here](https://gpt-index.readthedocs.io/en/latest/index.html)
 
 The GPT_Python_CLI project aims to provide a convenient command-line interface for users to interact with language models through the OpenAI API. Any opinions, findings, conclusions, or recommendations expressed in this project are those of the author(s) and do not necessarily reflect the views of OpenAI Inc.
 
 Please refer to OpenAI's official documentation for the most accurate and up-to-date information regarding the OpenAI API, GPT models, and their usage.
 
 ## Introduction
-
-**README is outdated, have to find time to update it. Conda is being used as dependency management, so no requirements.txt. You can check older versions for requirements.txt content and figure out the packages also from the environment.yml file**
 
 An unofficial Python-based command-line interface (CLI) for interacting with OpenAI's GPT-4 model. With this CLI, you can ask questions, generate text, and use custom prompts to control the model's output.
 
@@ -41,37 +39,37 @@ An unofficial Python-based command-line interface (CLI) for interacting with Ope
   git clone https://github.com/bradjohnl/gpt_python_cli.git
   ```
 
-2. Navigate to the repository directory:
+1. Navigate to the repository directory:
 
 ```bash
 cd gpt_python_cli
 ```
 
-3. Install the required dependencies:
+1. [Install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and create a new environment:
 
 ```bash
-pip install -r requirements.txt
+conda create -n gpt_python_cli -f environment.yml
 ```
 
-4. Set up an OpenAI API key as an environment variable:
+1. Set up an OpenAI API key as an environment variable:
 
 ```bash
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
-5. Create a configuration file in your home directory:
+1. Create a configuration file in your home directory:
 
 ```bash
 mkdir ~/.gpt_python_cli
 cp config_sample.json ~/.gpt_python_cli/config.json
 ```
 
-6. Customize the paths in config.json
+1. Customize the paths in config.json
 
 ## Usage
 
 ```bash
-./gpt_python_cli.py [options]
+./gpt_python_cli.sh [options]
 
 Options:
 
@@ -236,7 +234,7 @@ Do you want to continue the conversation? (y/n): n
 
 ### Use custom data from a file
 
-We have the bitcoin whitepaper in the library directory. 
+We have the Bitcoin whitepaper in the library directory. 
 Now we can ask questions about the document in the following way:
 
 ```bash
@@ -254,6 +252,7 @@ Do you want to continue the conversation? (y/n): n
 ### Add multiple files to the index and use them in the conversation
 
 Let's add all the files in the current repository to the index:
+
 ```bash
 cd gpt_python_cli
 for i in $(ls); do ./gpt_python_cli.py -ai $i; done; 
@@ -282,7 +281,6 @@ The license used is Creative Commons Attribution-NonCommercial 4.0 International
 
 In this example, we want to ask questions about the Auto-GPT repo: https://github.com/Torantulino/Auto-GPT
 
-
 ```bash
 find . -type f -not -path '*/\.*' -exec gpt_python_cli.py -ip .index.json -ai {} \;
 gpt_python_cli.py -ip . -q "What's the azure.yaml.template file for?"
@@ -298,6 +296,7 @@ The azure.yaml.template file is used to configure the Azure API for use with the
 ```
 
 Now let's ask a question about a file in a subfolder:
+
 ```bash 
 gpt_python_cli.py -ip . -q "What's the ai_config.py file for?"
 ```
@@ -312,6 +311,7 @@ Do you want to continue the conversation? (y/n):
 ### Use a custom prompt from the library
 
 #### JSON prompt
+
 In this example, we have added a custom prompt file named `pirate.json` to the library directory. The prompt template is:
 
 ```json
@@ -335,7 +335,7 @@ Run the following command to use the custom prompt:
 
 ##### Output
 
-```
+```text
 Ahoy there, me hearty! If ye be lookin' for the most precious treasure of all times, ye must be prepared to face great danger and challenges. The first step is to gather a crew of loyal and skilled pirates who are willing to follow ye to the ends of the earth. 
 
 Next, ye must acquire a map or clues that lead to the location of the treasure. This may involve negotiating with other pirates, stealing from wealthy merchants, or even battling sea monsters. 
@@ -380,7 +380,8 @@ Furthermore, we have added the `--print-only` flag to only print the output of t
 ```
 
 #### Output:
-```
+
+```text
 A transformer is a crucial component in an electrical system, serving several purposes, including:
 
 1. Voltage regulation: Transformers are used to step up or step down the voltage levels between different parts of an electrical system. For example, they may increase the voltage coming from power plants for long-distance transmission and decrease it for local distribution to consumers.
@@ -405,15 +406,16 @@ You may notice that the log file name is `20230317_None.log`. This is because th
 Contributions are welcome! If you'd like to help improve this project, please submit a pull request with your changes or create an issue to discuss your ideas.
 
 ## Known issues:
+
 - [ ] JSON data needs to be split into approx. 1MB chunks otherwise the error: `AssertionError: The batch size should not be larger than 2048.` will occur. There is an open bug on gpt_index tracking this issue: https://github.com/jerryjliu/gpt_index/issues/517
 
-## TODOs:
+## TODOs
 
 - [ ] Add support for other models (e.g. image, audio, etc.)
-- [ ] Add support for custom prompt on custom data.
+- [ ] Add support for custom prompts on custom data.
 - [ ] Add support for babyagi, Auto-GPT, LLAMA-cpp, and other interfaces.
 - [ ] Add pre-commit config
-- [ ] Add Pr templates.
+- [ ] Add PR templates.
 - [ ] Add issue templates.
 - [ ] Add contributing guidelines.
 - [ ] Add Docker support.
@@ -430,4 +432,3 @@ If you are using a JSON prompt, please make sure that the prompt is valid JSON. 
 ## License
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0). See the [LICENSE.md](LICENSE.md) file for more details.
-
